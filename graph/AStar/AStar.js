@@ -1,5 +1,6 @@
 // References:
 //  - https://www.geeksforgeeks.org/a-search-algorithm/
+//  - https://hankus.github.io/javascript-astar/docs/astar.html
 //  - https://briangrinstead.com/blog/astar-search-algorithm-in-javascript/
 //
 // Time Complexity  - O(E) - Being E the total number of edges
@@ -47,6 +48,7 @@ function aStar(grid, startY, startX, endY, endX) {
         H: null,
         G: Infinity,
         F: Infinity,
+        closed: false,
         visited: false,
         parent: null
       });
@@ -83,28 +85,29 @@ function aStar(grid, startY, startX, endY, endX) {
       return path.reverse();
     }
 
-    currentNode.visited = true;
+    currentNode.closed = true;
 
     for (const neighbor of getNeighbors(aStarGrid, currentNode)) {
       // Ignore invalid nodes
-      if (neighbor.visited || neighbor.value === WALL) {
+      if (neighbor.closed || neighbor.value === WALL) {
         continue;
       }
+
+      const beenVisited = neighbor.visited;
 
       const distanceFromCurrentToNeighbor = 1;
       const gScore = currentNode.G + distanceFromCurrentToNeighbor;
 
-      const isInOpenList = openList.find(n => n.y === neighbor.y && n.x === neighbor.x);
-
       // First time arriving at this node, H must be set as is undefined yet.
-      if (!isInOpenList) {
+      if (!beenVisited) {
         neighbor.H = heuristic(neighbor, endX, endY);
+        neighbor.visited = true;
         openList.push(neighbor);
       }
 
       // Found an optimal path to this node. Save how this node was reached
       // and update G and F values
-      if (!isInOpenList || gScore < neighbor.G) {
+      if (!beenVisited || gScore < neighbor.G) {
         neighbor.parent = currentNode;
         neighbor.G = gScore;
         neighbor.F = neighbor.G + neighbor.H;
@@ -120,6 +123,6 @@ console.log(
   aStar([
     ['', WALL, ''],
     ['', WALL, ''],
-    ['', WALL, ''],
+    ['', '', ''],
   ], 0, 0, 0, 2)
 )
